@@ -57,7 +57,8 @@ export default function UnoGame() {
             reconnectionDelay: 1000,
             timeout: 20000,
             forceNew: true,
-            path: '/socket.io/'
+            path: '/socket.io/',
+            withCredentials: true
         });
 
         socket.on('connect', () => {

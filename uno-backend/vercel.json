@@ -9,11 +9,20 @@
     "routes": [
         {
             "src": "/socket.io/(.*)",
-            "dest": "index.js"
+            "dest": "index.js",
+            "headers": {
+                "Access-Control-Allow-Origin": "https://uno-next-afew.vercel.app",
+                "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+                "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
+                "Access-Control-Allow-Credentials": "true"
+            }
         },
         {
             "src": "/(.*)",
-            "dest": "index.js"
+            "dest": "index.js",
+            "headers": {
+                "Access-Control-Allow-Origin": "*"
+            }
         }
     ],
     "env": {
