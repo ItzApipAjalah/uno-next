@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import Image from 'next/image';
@@ -28,6 +30,10 @@ interface GameResult {
     }[];
 }
 
+interface PlayerWithCards extends Player {
+    cardCount?: number;
+}
+
 export default function UnoGame() {
     const [playerName, setPlayerName] = useState<string>('');
     const [roomId, setRoomId] = useState('');
@@ -39,6 +45,8 @@ export default function UnoGame() {
     const [cards, setCards] = useState<Card[]>([]);
     const [topCard, setTopCard] = useState<Card | null>(null);
     const [currentPlayer, setCurrentPlayer] = useState<string>('');
+    const [winner, setWinner] = useState<string>('');
+    const [gameResult, setGameResult] = useState<GameResult | null>(null);
     const [playerCardCounts, setPlayerCardCounts] = useState<{[key: string]: number}>({});
 
     useEffect(() => {
@@ -174,6 +182,9 @@ export default function UnoGame() {
                     startNewGame();
                 }
             });
+
+            setGameResult(result);
+            setGameStarted(false);
         });
 
         socket.on('roomError', (message: string) => {
@@ -259,6 +270,7 @@ export default function UnoGame() {
     };
 
     const startNewGame = () => {
+        setGameResult(null);
         setCards([]);
         setTopCard(null);
         setCurrentPlayer('');
@@ -395,7 +407,7 @@ export default function UnoGame() {
                     {players.filter(p => p.id !== socket.id).map((player, index) => {
                         const totalPlayers = players.length - 1;
                         const angle = (index * (360 / totalPlayers)) * (Math.PI / 180);
-                        const viewportRadius = Math.min(window.innerWidth, window.innerHeight) * 0.3;
+                        const radius = Math.min(window.innerWidth, window.innerHeight) * 0.3;
                         const left = `${50 + Math.cos(angle) * 35}%`;
                         const top = `${50 + Math.sin(angle) * 35}%`;
 
@@ -447,9 +459,9 @@ export default function UnoGame() {
                 <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 p-6 w-full max-w-4xl">
                     <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-xl">
                         <div className="flex justify-center items-end -space-x-12 md:-space-x-8">
-                            {cards.map((card, i) => (
+                            {cards.map((card, index) => (
                                 <div 
-                                    key={`${card.color}-${card.number}-${i}`}
+                                    key={index}
                                     onClick={() => currentPlayer === socket.id && playCard(card)}
                                     className={`
                                         transform hover:-translate-y-8 
@@ -460,8 +472,8 @@ export default function UnoGame() {
                                         transition-all duration-300 ease-in-out
                                     `}
                                     style={{
-                                        transform: `translateX(${i * 2}px) rotate(${
-                                            -15 + (i * (30 / cards.length))
+                                        transform: `translateX(${index * 2}px) rotate(${
+                                            -15 + (index * (30 / cards.length))
                                         }deg)`,
                                         transformOrigin: 'bottom center'
                                     }}
